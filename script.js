@@ -134,3 +134,61 @@ habitInput.addEventListener("keypress", (e) => {
 
 renderSuggestedHabits();
 renderHabits();
+// ----------------------
+// Task Tracker Section
+// ----------------------
+const taskInput = document.getElementById("taskInput");
+const addTaskBtn = document.getElementById("addTaskBtn");
+const taskList = document.getElementById("taskList");
+
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+function renderTasks() {
+  taskList.innerHTML = "";
+  tasks.forEach((task, index) => {
+    const li = document.createElement("li");
+    li.className = "task-item";
+    li.textContent = task.text;
+
+    if (task.done) li.classList.add("done");
+
+    li.addEventListener("click", () => toggleTask(index));
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "x";
+    deleteBtn.className = "delete-btn";
+    deleteBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      deleteTask(index);
+    });
+
+    li.appendChild(deleteBtn);
+    taskList.appendChild(li);
+  });
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+function addTask() {
+  const text = taskInput.value.trim();
+  if (text === "") return;
+  tasks.push({ text, done: false });
+  taskInput.value = "";
+  renderTasks();
+}
+
+function toggleTask(index) {
+  tasks[index].done = !tasks[index].done;
+  renderTasks();
+}
+
+function deleteTask(index) {
+  tasks.splice(index, 1);
+  renderTasks();
+}
+
+addTaskBtn.addEventListener("click", addTask);
+taskInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") addTask();
+});
+
+renderTasks();
