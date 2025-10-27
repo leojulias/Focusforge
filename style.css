@@ -14,6 +14,7 @@ body {
   margin: 0;
   padding: 20px;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .app {
@@ -24,6 +25,18 @@ body {
   width: 100%;
   max-width: 450px;
   text-align: center;
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 h1 {
@@ -32,6 +45,16 @@ h1 {
   font-size: 2.2em;
   font-weight: 600;
   letter-spacing: 1px;
+  animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%, 100% {
+    text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(0, 255, 204, 0.8);
+  }
 }
 
 .tagline {
@@ -94,6 +117,55 @@ button:active {
   transform: translateY(0);
 }
 
+.suggested-section {
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #333;
+}
+
+.suggested-section h3 {
+  color: #00ffcc;
+  font-size: 16px;
+  margin-bottom: 15px;
+  font-weight: 500;
+}
+
+.suggested-habits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.suggested-chip {
+  background: #1e1e1e;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.suggested-chip:hover {
+  background: #252525;
+  border-color: #00ffcc;
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 255, 204, 0.2);
+}
+
 ul {
   list-style: none;
   padding: 0;
@@ -127,12 +199,33 @@ li {
   gap: 10px;
   transition: all 0.3s ease;
   border: 1px solid transparent;
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+li.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+li.removing {
+  animation: slideOut 0.3s ease-out forwards;
+}
+
+@keyframes slideOut {
+  to {
+    opacity: 0;
+    transform: translateX(100px);
+    height: 0;
+    padding: 0;
+    margin: 0;
+  }
 }
 
 li:hover {
   background: #252525;
   border-color: #00ffcc33;
-  transform: translateX(4px);
+  transform: translateX(4px) scale(1.02);
 }
 
 .habit-text {
@@ -148,6 +241,19 @@ li:hover {
   text-decoration: line-through;
   opacity: 0.5;
   color: #888;
+  animation: completeCheck 0.5s ease-out;
+}
+
+@keyframes completeCheck {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .delete-btn {
@@ -169,7 +275,7 @@ li:hover {
   background: #ff4757;
   color: #fff;
   border-color: #ff4757;
-  transform: translateY(0) scale(1.1);
+  transform: translateY(0) scale(1.1) rotate(90deg);
   box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
 }
 
@@ -197,6 +303,37 @@ li:hover {
   color: #fff;
   font-size: 18px;
   font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.celebration {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.celebration.active {
+  opacity: 1;
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -10px;
+  animation: fall 1s linear forwards;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(100vh) rotate(720deg);
+  }
 }
 
 @media (max-width: 480px) {
@@ -211,5 +348,10 @@ li:hover {
   .stats {
     flex-direction: column;
     gap: 10px;
+  }
+  
+  .suggested-chip {
+    font-size: 12px;
+    padding: 6px 12px;
   }
 }

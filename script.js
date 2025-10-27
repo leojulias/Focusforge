@@ -3,13 +3,71 @@ const addHabitBtn = document.getElementById("addHabit");
 const habitList = document.getElementById("habitList");
 const totalHabits = document.getElementById("totalHabits");
 const completedHabits = document.getElementById("completedHabits");
+const suggestedHabitsContainer = document.getElementById("suggestedHabits");
+const celebration = document.getElementById("celebration");
 
 let habits = JSON.parse(localStorage.getItem("habits")) || [];
 
-function renderHabits() {
+const suggestedHabits = [
+  "💧 Drink 8 glasses of water",
+  "🏃 Exercise for 30 minutes",
+  "📖 Read for 20 minutes",
+  "🧘 Meditate for 10 minutes",
+  "🌅 Wake up at 6 AM",
+  "💤 Sleep 8 hours",
+  "🥗 Eat healthy meals",
+  "📝 Journal daily thoughts"
+];
+
+function createCelebration() {
+  celebration.innerHTML = "";
+  for (let i = 0; i < 30; i++) {
+    const confetti = document.createElement("div");
+    confetti.className = "confetti";
+    confetti.style.left = Math.random() * 100 + "%";
+    confetti.style.animationDelay = Math.random() * 0.3 + "s";
+    confetti.style.backgroundColor = [
+      "#00ffcc",
+      "#ff4757",
+      "#ffd93d",
+      "#6c5ce7",
+      "#fd79a8"
+    ][Math.floor(Math.random() * 5)];
+    celebration.appendChild(confetti);
+  }
+  
+  celebration.classList.add("active");
+  setTimeout(() => {
+    celebration.classList.remove("active");
+  }, 1000);
+}
+
+function renderSuggestedHabits() {
+  suggestedHabitsContainer.innerHTML = "";
+  suggestedHabits.forEach((habit) => {
+    const chip = document.createElement("div");
+    chip.className = "suggested-chip";
+    chip.textContent = habit;
+    chip.addEventListener("click", () => {
+      habitInput.value = habit;
+      addHabit();
+    });
+    suggestedHabitsContainer.appendChild(chip);
+  });
+}
+
+function renderHabits(animateLastItem = false) {
   habitList.innerHTML = "";
   habits.forEach((habit, index) => {
     const li = document.createElement("li");
+    li.className = "habit-item show";
+    
+    if (animateLastItem && index === habits.length - 1) {
+      li.classList.remove("show");
+      setTimeout(() => {
+        li.classList.add("show");
+      }, 50);
+    }
     
     const habitText = document.createElement("span");
     habitText.className = "habit-text";
@@ -42,17 +100,28 @@ function addHabit() {
   if (text === "") return;
   habits.push({ text, completed: false });
   habitInput.value = "";
-  renderHabits();
+  renderHabits(true);
 }
 
 function toggleHabit(index) {
+  const wasCompleted = habits[index].completed;
   habits[index].completed = !habits[index].completed;
+  
+  if (!wasCompleted && habits[index].completed) {
+    createCelebration();
+  }
+  
   renderHabits();
 }
 
 function deleteHabit(index) {
-  habits.splice(index, 1);
-  renderHabits();
+  const li = habitList.children[index];
+  li.classList.add("removing");
+  
+  setTimeout(() => {
+    habits.splice(index, 1);
+    renderHabits();
+  }, 300);
 }
 
 addHabitBtn.addEventListener("click", addHabit);
@@ -63,4 +132,5 @@ habitInput.addEventListener("keypress", (e) => {
   }
 });
 
+renderSuggestedHabits();
 renderHabits();
