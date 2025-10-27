@@ -10,11 +10,25 @@ function renderHabits() {
   habitList.innerHTML = "";
   habits.forEach((habit, index) => {
     const li = document.createElement("li");
-    li.textContent = habit.text;
-    if (habit.completed) li.classList.add("completed");
-
-    li.addEventListener("click", () => toggleHabit(index));
-
+    
+    const habitText = document.createElement("span");
+    habitText.className = "habit-text";
+    habitText.textContent = habit.text;
+    if (habit.completed) habitText.classList.add("completed");
+    
+    habitText.addEventListener("click", () => toggleHabit(index));
+    
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "delete-btn";
+    deleteBtn.textContent = "×";
+    deleteBtn.setAttribute("aria-label", `Delete habit: ${habit.text}`);
+    deleteBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      deleteHabit(index);
+    });
+    
+    li.appendChild(habitText);
+    li.appendChild(deleteBtn);
     habitList.appendChild(li);
   });
 
@@ -36,5 +50,17 @@ function toggleHabit(index) {
   renderHabits();
 }
 
+function deleteHabit(index) {
+  habits.splice(index, 1);
+  renderHabits();
+}
+
 addHabitBtn.addEventListener("click", addHabit);
+
+habitInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    addHabit();
+  }
+});
+
 renderHabits();
