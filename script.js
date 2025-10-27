@@ -1,21 +1,23 @@
-// Safe start: find elements and create fallbacks if missing
+// Robust habit tracker script with defensive checks and reliable click behavior
+
+// Get elements (we'll guard against missing elements)
 let habitInput = document.getElementById("habitInput");
 const addHabitBtn = document.getElementById("addHabit");
 const habitList = document.getElementById("habitList");
 const totalHabits = document.getElementById("totalHabits");
 const completedHabits = document.getElementById("completedHabits");
-
-// suggestedHabitsContainer and celebration might be missing in index.html -> create them if necessary
 let suggestedHabitsContainer = document.getElementById("suggestedHabits");
+let celebration = document.getElementById("celebration");
+
+// If suggested or celebration containers are missing, create them so script won't crash
 if (!suggestedHabitsContainer) {
   const suggestedSection = document.createElement("section");
   suggestedSection.className = "suggested-section";
-  suggestedSection.innerHTML = '<h3>Suggested Habits</h3>';
+  suggestedSection.innerHTML = "<h3>Suggested Habits</h3>";
   suggestedHabitsContainer = document.createElement("div");
   suggestedHabitsContainer.id = "suggestedHabits";
   suggestedHabitsContainer.className = "suggested-habits";
   suggestedSection.appendChild(suggestedHabitsContainer);
-  // Insert before the habit list if present, otherwise append to .app
   const app = document.querySelector(".app") || document.body;
   const reference = document.getElementById("habitList");
   if (reference) app.insertBefore(suggestedSection, reference);
@@ -23,7 +25,6 @@ if (!suggestedHabitsContainer) {
   console.warn("suggestedHabits container was missing — created automatically.");
 }
 
-let celebration = document.getElementById("celebration");
 if (!celebration) {
   celebration = document.createElement("div");
   celebration.id = "celebration";
@@ -33,7 +34,7 @@ if (!celebration) {
 }
 
 if (!habitInput) {
-  // Try to re-query after potential dynamic DOM changes, else create a fallback input
+  // try once more, else warn (index.html should contain the input)
   habitInput = document.getElementById("habitInput");
   if (!habitInput) {
     console.error("habitInput not found. Add an input with id='habitInput' in your HTML.");
@@ -61,19 +62,11 @@ function createCelebration() {
     confetti.className = "confetti";
     confetti.style.left = Math.random() * 100 + "%";
     confetti.style.animationDelay = Math.random() * 0.3 + "s";
-    confetti.style.backgroundColor = [
-      "#00ffcc",
-      "#ff4757",
-      "#ffd93d",
-      "#6c5ce7",
-      "#fd79a8"
-    ][Math.floor(Math.random() * 5)];
+    confetti.style.backgroundColor = ["#00ffcc","#ff4757","#ffd93d","#6c5ce7","#fd79a8"][Math.floor(Math.random()*5)];
     celebration.appendChild(confetti);
   }
   celebration.classList.add("active");
-  setTimeout(() => {
-    celebration.classList.remove("active");
-  }, 1000);
+  setTimeout(() => celebration.classList.remove("active"), 1000);
 }
 
 function renderSuggestedHabits() {
@@ -84,10 +77,9 @@ function renderSuggestedHabits() {
     chip.className = "suggested-chip";
     chip.textContent = habit;
     chip.addEventListener("click", () => {
-      if (habitInput) {
-        habitInput.value = habit;
-        addHabit();
-      }
+      if (!habitInput) return;
+      habitInput.value = habit;
+      addHabit();
     });
     suggestedHabitsContainer.appendChild(chip);
   });
@@ -95,10 +87,11 @@ function renderSuggestedHabits() {
 
 function renderHabits(animateLastItem = false) {
   if (!habitList) {
-    console.error("habitList element not found in HTML.");
+    console.error("habitList element not found.");
     return;
   }
   habitList.innerHTML = "";
+
   habits.forEach((habit, index) => {
     const li = document.createElement("li");
     li.className = "habit-item show";
@@ -107,9 +100,7 @@ function renderHabits(animateLastItem = false) {
 
     if (animateLastItem && index === habits.length - 1) {
       li.classList.remove("show");
-      setTimeout(() => {
-        li.classList.add("show");
-      }, 50);
+      setTimeout(() => li.classList.add("show"), 50);
     }
 
     const habitText = document.createElement("span");
@@ -117,13 +108,13 @@ function renderHabits(animateLastItem = false) {
     habitText.textContent = habit.text;
     if (habit.completed) habitText.classList.add("completed");
 
-    // Use click for maximum compatibility (mobile and desktop)
+    // Use click (widely compatible across browsers and touch devices)
     li.addEventListener("click", (e) => {
-      // Make sure clicks on the delete button don't trigger toggle (deleteBtn stops propagation)
+      // click on delete button will stopPropagation; safe to toggle here
       toggleHabit(index);
     });
 
-    // Keyboard accessibility: Enter or Space toggles completion
+    // Keyboard accessibility
     li.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
@@ -136,7 +127,7 @@ function renderHabits(animateLastItem = false) {
     deleteBtn.textContent = "×";
     deleteBtn.setAttribute("aria-label", `Delete habit: ${habit.text}`);
     deleteBtn.addEventListener("click", (e) => {
-      e.stopPropagation(); // prevent li click from firing
+      e.stopPropagation();
       deleteHabit(index);
     });
 
@@ -145,8 +136,8 @@ function renderHabits(animateLastItem = false) {
     habitList.appendChild(li);
   });
 
-  totalHabits.textContent = habits.length;
-  completedHabits.textContent = habits.filter(h => h.completed).length;
+  if (totalHabits) totalHabits.textContent = habits.length;
+  if (completedHabits) completedHabits.textContent = habits.filter(h => h.completed).length;
   localStorage.setItem("habits", JSON.stringify(habits));
 }
 
@@ -164,36 +155,30 @@ function toggleHabit(index) {
     console.warn("toggleHabit: index out of range", index);
     return;
   }
-  console.log('toggleHabit called', index, habits[index]);
+  console.log("toggleHabit called", index, habits[index]);
   const wasCompleted = habits[index].completed;
   habits[index].completed = !habits[index].completed;
-
-  if (!wasCompleted && habits[index].completed) {
-    createCelebration();
-  }
-
+  if (!wasCompleted && habits[index].completed) createCelebration();
   renderHabits();
 }
 
 function deleteHabit(index) {
   const li = habitList && habitList.children[index];
   if (li) li.classList.add("removing");
-
   setTimeout(() => {
     habits.splice(index, 1);
     renderHabits();
   }, 300);
 }
 
+// Wire up controls
 if (addHabitBtn) addHabitBtn.addEventListener("click", addHabit);
-
 if (habitInput) {
   habitInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      addHabit();
-    }
+    if (e.key === "Enter") addHabit();
   });
 }
 
+// initial render
 renderSuggestedHabits();
-renderHabits();    
+renderHabits();
