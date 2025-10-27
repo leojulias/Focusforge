@@ -61,7 +61,9 @@ function renderHabits(animateLastItem = false) {
   habits.forEach((habit, index) => {
     const li = document.createElement("li");
     li.className = "habit-item show";
-    
+    li.setAttribute("role", "button");
+    li.tabIndex = 0;
+
     if (animateLastItem && index === habits.length - 1) {
       li.classList.remove("show");
       setTimeout(() => {
@@ -73,15 +75,24 @@ function renderHabits(animateLastItem = false) {
     habitText.className = "habit-text";
     habitText.textContent = habit.text;
     if (habit.completed) habitText.classList.add("completed");
-    
-    habitText.addEventListener("click", () => toggleHabit(index));
+
+    // Make the whole li clickable/tappable for better touch support
+    li.addEventListener("click", () => toggleHabit(index));
+
+    // Keyboard accessibility: Enter or Space toggles completion
+    li.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleHabit(index);
+      }
+    });
     
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "delete-btn";
     deleteBtn.textContent = "×";
     deleteBtn.setAttribute("aria-label", `Delete habit: ${habit.text}`);
     deleteBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
+      e.stopPropagation(); // prevent li click from firing
       deleteHabit(index);
     });
     
