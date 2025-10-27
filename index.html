@@ -1,1 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FocusForge</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <h1>FocusForge</h1>
+    <p class="tagline">Forge Your Focus. Master Your Habits.</p>
 
+    <div class="habit-input">
+      <input type="text" id="habitInput" placeholder="Enter a new habit..." />
+      <button id="addHabit">Add</button>
+    </div>
+
+    <ul id="habitList"></ul>
+
+    <div class="stats">
+      <p><strong>Total Habits:</strong> <span id="totalHabits">0</span></p>
+      <p><strong>Completed:</strong> <span id="completedHabits">0</span></p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
